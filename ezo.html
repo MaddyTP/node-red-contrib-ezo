@@ -1,0 +1,101 @@
+<script type="text/html" data-template-name="ezo">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-ezoBoard"><i class="fa fa-microchip"></i> Module</label>
+        <select id="node-input-ezoBoard">
+            <option value="ph">pH</option>
+            <option value="orp">ORP</option>
+            <option value="do">Dissolved Oxygen</option>
+            <option value="ec">Conductivity</option>
+            <option value="rtd">Temperature</option>
+            <option value="co2">CO2 (Gas)</option>
+            <option value="o2">Oxygen (Gas)</option>
+            <option value="hum">Humidity</option>
+            <option value="prs">Pressure</option>
+            <option value="pmp">Peristaltic Pump</option>
+            <option value="pmp-l">Peristaltic Pump - Large</option>
+            <option value="rgb">Color</option>
+            <option value="flo">Flow</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for='node-input-customAddr'><i class='fa fa-pencil'></i> Custom</label>
+        <input type='checkbox' id='node-input-customAddr' style='width: auto; border: none; vertical-align: baseline;'>
+        <span for='node-input-customAddr' style="padding-left: 5px;">User-defined address?</span>
+    </div>
+    <div class="form-row addr-row">
+        <label for="node-input-address"><i class="fa fa-address-card-o"></i> Address</label>
+        <input type="number" id="node-input-address" style='width: 100px;' min=3 max=127>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ezo">
+    <h3>Details</h3>
+    <p>
+        Communicates with Atlas Scientific Ezo modules over I2C.
+        See manufacturers documentation for supported commands.
+    </p>
+    <p>
+        Input accepts a string in <code>msg.payload</code>, 
+        sends to device as Buffer, then outputs the response.
+    </p>
+    <p>
+        Response is broken into three properties: <code>msg.status</code>
+         stores the response status with message, <code>msg.command</code>
+         stores the initial command, and <code>msg.payload</code>
+         stores the response value(s).
+    </p>
+    <h3>References</h3>
+    <ul>
+        <li><a>GitHub</a> - the nodes github repository</li>
+        <li><a href='https://atlas-scientific.com/'>Atlas Scientific</a> - device website.</li>
+    </ul>
+    <h3>Documentation</h3>
+    <ul>
+        <li><a href='https://atlas-scientific.com/files/pH_EZO_Datasheet.pdf'>EZO-PH</a> - pH</li>
+        <li><a href='https://atlas-scientific.com/files/ORP_EZO_Datasheet.pdf'>EZO-ORP</a> - ORP</li>
+        <li><a href='https://atlas-scientific.com/files/DO_EZO_Datasheet.pdf'>EZO-DO</a> - dissolved oxygen</li>
+        <li><a href='https://atlas-scientific.com/files/EC_EZO_Datasheet.pdf'>EZO-EC</a> - conductivity</li>
+        <li><a href='https://atlas-scientific.com/files/EZO_RTD_Datasheet.pdf'>EZO-RTD</a> - temperature</li>
+        <li><a href='https://atlas-scientific.com/files/flow_EZO_Datasheet.pdf'>EZO-FLOW</a> - flow</li>
+        <li><a href='https://atlas-scientific.com/files/EZO_PMP_Datasheet.pdf'>EZO-PMP</a> - peristaltic pump</li>
+        <li><a href='https://atlas-scientific.com/files/EZO_PMP_L_Datasheet.pdf'>EZO-PMP-L</a> - peristaltic pump (large)</li>
+        <li><a href='https://atlas-scientific.com/files/EZO-HUM-Datasheet.pdf'>EZO-HUM</a> - humidity</li>
+        <li><a href='https://atlas-scientific.com/files/EZO_O2_datasheet.pdf'>EZO-O2</a> - oxygen (gas)</li>
+        <li><a href='https://atlas-scientific.com/files/EZO_CO2_Datasheet.pdf'>EZO-CO2</a> - carbon dioxide (gas)</li>
+        <li><a href='https://atlas-scientific.com/files/EZO_RGB_Datasheet.pdf'>EZO-RGB</a> - color</li>
+        <li><a href='https://atlas-scientific.com/files/EZO-PRS-Datasheet.pdf'>EZO-PRS</a> - pressure</li>
+    </ul>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('ezo', {
+        category: 'ezo',
+        defaults: {
+            name: { value: "" },
+            address: { value: 3, validate: function (v) { return ((v === 3) || (RED.validators.number(v) && (v >= 3) && (v <= 127))) } },
+            customAddr: { value: false },
+            ezoBoard: { value: "ph" },
+            tempComp: { value: false },
+        },
+        color:"#54A769",
+        inputs:1,
+        outputs:1,
+        icon: "serial.png",
+        label: function() { return this.name || this.ezoBoard; },
+        labelStyle: function() { return this.name ? "node_label_italic" : ""; },
+        oneditprepare: function() {
+            $('#node-input-customAddr').on("change", function () {
+                if ($(this)[0].checked) {
+                    $('.addr-row').show();
+                }
+                else {
+                    $('.addr-row').hide();
+                }
+            });
+        }
+    });
+</script>
