@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-ezo",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Node to communicate with Atlas Scientific Ezo modules over I2C.",
   "dependencies": {
     "i2c-bus": "^5.2.2"
