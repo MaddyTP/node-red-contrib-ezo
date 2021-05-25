@@ -55,6 +55,13 @@ module.exports = function(RED) {
         var isRunning = false;
         var noRead = ['sleep', 'factory', 'i2c'];
 
+        node.errorHandler = (port, err) => {
+            port.closeSync();
+            node.error(err);
+            isRunning = false;
+            return;
+        }
+
         node.processResponse = (res) => {
             var converted = { status: { code: 0, message: ''}, command: '', value: ''};
             converted.status.code = res[0];
@@ -98,46 +105,46 @@ module.exports = function(RED) {
         };
 
         node.on("input", function(msg) {
-            if (!isRunning) {
-                var port = I2C.openSync(1);
-                try {
-                    isRunning = true;
-                    var pload = msg.payload;
-                    if (typeof pload !== "string" || pload.length > 32) {
-                        throw new Error('Invalid payload!');
-                    }
-                    var buf = Buffer.from(pload);
-                    port.i2cWrite(node.address, buf.length, buf, function(err) {
-                        if (err) throw err;
-                        const strTest = new RegExp(noRead.join('|')).test(pload.toLowerCase());
-                        if (!strTest) {
-                            var rBuf = Buffer.alloc(32);
-                            const loop = setInterval(() => {
-                                port.i2cRead(node.address, rBuf.length, rBuf, function(err, size, res) {
-                                    if (err) throw err;
-                                    if (res[0] !== 254) {
-                                        clearInterval(loop);
-                                        var newRes = node.processResponse(res);
-                                        if (newRes.command === '') {
-                                            newRes.command = (pload.indexOf(',') === -1) ? pload : pload.split(',')[0];
-                                        }
-                                        newMsg = {};
-                                        newMsg.status = newRes.status;
-                                        newMsg.command = newRes.command;
-                                        newMsg.payload = newRes.value;
-                                        node.send(newMsg);
-                                    }
-                                });
-                            }, 300);
-                        }
-                    });
-                } catch(e) {
-                    node.error(e, msg);
-                } finally {
-                    port.closeSync();
-                    isRunning = false;
-                }
+            var pload = msg.payload;
+            if (typeof pload !== "string" || pload.length > 32) {
+                node.error('Invalid payload!');
+                return;
             }
+            var buf = Buffer.from(pload);
+            var port = I2C.openSync(1);
+            port.i2cWrite(node.address, buf.length, buf, function(err) {
+                if (err) {
+                    node.errorHandler(port, err);
+                    return;
+                };
+                const strTest = new RegExp(noRead.join('|')).test(pload.toLowerCase());
+                if (!strTest && !isRunning) {
+                    isRunning = true;
+                    var rBuf = Buffer.alloc(32);
+                    const loop = setInterval(() => {
+                        port.i2cRead(node.address, rBuf.length, rBuf, function(err, size, res) {
+                            if (err) {
+                                node.errorHandler(port, err);
+                                return;
+                            };
+                            if (res[0] !== 254) {
+                                clearInterval(loop);
+                                port.closeSync();
+                                var newRes = node.processResponse(res);
+                                if (newRes.command === '') {
+                                    newRes.command = (pload.indexOf(',') === -1) ? pload : pload.split(',')[0];
+                                }
+                                newMsg = {};
+                                newMsg.status = newRes.status;
+                                newMsg.command = newRes.command;
+                                newMsg.payload = newRes.value;
+                                node.send(newMsg);
+                                isRunning = false;
+                            }
+                        });
+                    }, 300);
+                }
+            });
         });
     }
     RED.nodes.registerType("ezo", Ezo);
