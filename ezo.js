@@ -79,10 +79,8 @@ module.exports = function(RED) {
                     converted.status.message = 'no data to send';
                     break;
             }
-            var resString = res.toString('utf8', 1);
-            if (resString === '') {
-                converted.value = '';
-            } else {
+            var resString = res.toString('utf8', 1).replace(/\0/g, '');
+            if (resString !== '') {
                 if (resString.indexOf(',') !== -1) {
                     var splt = resString.split(',');
                     if (splt[0].indexOf('?') !== -1) {
@@ -100,6 +98,9 @@ module.exports = function(RED) {
                 } else {
                     converted.value = Number.isNaN(resString) ? resString : parseFloat(resString);
                 }
+            } else {
+                converted.command = '';
+                converted.value = '';
             }
             return converted;
         };
