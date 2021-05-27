@@ -3,7 +3,6 @@ module.exports = function(RED) {
 
     function Ezo(config) {
         RED.nodes.createNode(this, config);
-        this.tempComp = config.tempComp;
 
         if (config.customAddr) { 
             this.address = parseInt(config.address);
@@ -55,30 +54,35 @@ module.exports = function(RED) {
         var isRunning = false;
         var noRead = ['sleep', 'factory', 'i2c'];
 
-        node.errorHandler = (port, err) => {
+        node.errorHandler = (port, err, msg) => {
             port.closeSync();
-            node.error(err);
+            node.error(err, msg);
             isRunning = false;
             return;
         }
 
-        node.processResponse = (res) => {
-            var converted = { status: { code: 0, message: ''}, command: '', value: ''};
-            converted.status.code = res[0];
-            switch(converted.status.code) {
-                case 1:
-                    converted.status.message = 'success';
-                    break;
-                case 2:
-                    converted.status.message = 'syntax error';
-                    break;
-                case 254:
-                    converted.status.message = 'still processing - not ready';
-                    break;
-                case 255:
-                    converted.status.message = 'no data to send';
-                    break;
+        node.processRequest = (req) => {
+            var newStr = '';
+            var c = '';
+            var p = '';
+            if (req.hasOwnProperty('command')) { c = req.command.toString(); }
+            if (req.hasOwnProperty('payload')) {
+                p = req.payload.toString();
+                if (p === 'true') p = '1';
+                if (p === 'false') p = '0';
             }
+            if (c !== '' && p !== '') {
+                newStr = `${c},${p}`;
+            } else if (c !== '') {
+                newStr = c;
+            } else {             
+                newStr = p;
+            }
+            return newStr;
+        }
+
+        node.processResponse = (res) => {
+            var converted = { command: '', value: ''};
             var resString = res.toString('utf8', 1).replace(/\0/g, '');
             if (resString !== '') {
                 if (resString.indexOf(',') !== -1) {
@@ -106,8 +110,8 @@ module.exports = function(RED) {
         };
 
         node.on("input", function(msg) {
-            var pload = msg.payload;
-            if (typeof pload !== "string" || pload.length > 32) {
+            var pload = node.processRequest(msg);
+            if (pload.length > 32) {
                 node.error('Invalid payload!');
                 return;
             }
@@ -115,7 +119,7 @@ module.exports = function(RED) {
             var port = I2C.openSync(1);
             port.i2cWrite(node.address, buf.length, buf, function(err) {
                 if (err) {
-                    node.errorHandler(port, err);
+                    node.errorHandler(port, err, msg);
                     return;
                 };
                 const strTest = new RegExp(noRead.join('|')).test(pload.toLowerCase());
@@ -125,18 +129,29 @@ module.exports = function(RED) {
                     const loop = setInterval(() => {
                         port.i2cRead(node.address, rBuf.length, rBuf, function(err, size, res) {
                             if (err) {
-                                node.errorHandler(port, err);
+                                node.errorHandler(port, err, msg);
                                 return;
                             };
                             if (res[0] !== 254) {
                                 clearInterval(loop);
+                                if (res[0] === 2) {
+                                    node.errorHandler(port, 'Syntax error!', msg);
+                                    return;
+                                }
                                 port.closeSync();
+                                if (res[0] === 255) {
+                                    node.warn('No data to send.');
+                                    isRunning = false;
+                                    return;
+                                }
                                 var newRes = node.processResponse(res);
                                 if (newRes.command === '') {
                                     newRes.command = (pload.indexOf(',') === -1) ? pload : pload.split(',')[0];
                                 }
-                                newMsg = {};
-                                newMsg.status = newRes.status;
+                                var newMsg = {};
+                                if (msg.hasOwnProperty('topic')) {
+                                    newMsg.topic = msg.topic;
+                                }
                                 newMsg.command = newRes.command;
                                 newMsg.payload = newRes.value;
                                 node.send(newMsg);
