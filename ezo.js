@@ -148,13 +148,9 @@ module.exports = function(RED) {
                                 if (newRes.command === '') {
                                     newRes.command = (pload.indexOf(',') === -1) ? pload : pload.split(',')[0];
                                 }
-                                var newMsg = {};
-                                if (msg.hasOwnProperty('topic')) {
-                                    newMsg.topic = msg.topic;
-                                }
-                                newMsg.command = newRes.command;
-                                newMsg.payload = newRes.value;
-                                node.send(newMsg);
+                                msg.command = newRes.command;
+                                msg.payload = newRes.value;
+                                node.send(msg);
                                 isRunning = false;
                             }
                         });
