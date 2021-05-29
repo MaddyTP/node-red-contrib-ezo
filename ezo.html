@@ -80,7 +80,7 @@
             name: { value: '' },
             address: { value: 3, validate: function (v) { return ((v === 3) || (RED.validators.number(v) && (v >= 3) && (v <= 127))) } },
             customAddr: { value: false },
-            ezoBoard: { value: '' },
+            ezoBoard: { value: '', required: true },
             ezoTopic: { value: '' },
         },
         color:"#54A769",
