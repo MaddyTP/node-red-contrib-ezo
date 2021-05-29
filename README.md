@@ -30,9 +30,9 @@ msg = { payload: 'Status' };  // returns status
 msg = { command: 'R'};  // reads probe
 ```
 
-### Ouptuts
+### Ouptut
 
-Some commands such as 'Sleep', 'Factory', and 'I2C,n' do not provide a response so will not generate an output message.  Most commands will generate a response containing the original command and a value, however some Ezo modules can generate multiple values in which the `msg.payload` will contain an array.  If the output value can be parsed to a number it will be, otherwise it will be a string.  Since v1.1.0 `msg.topic` is preserved through to output. 
+Some commands such as 'Sleep', 'Factory', and 'I2C,n' do not provide a response so will not generate an output message.  Most commands will generate a response containing the original command and a value, however some Ezo modules can generate multiple values in which the `msg.payload` will contain an array.  If the output value can be parsed to a number it will be, otherwise it will be a string.  Since v1.1.1 extra properties in input pass through to output. 
 
 ```javascript
 msg = {
@@ -70,15 +70,14 @@ msg = {
 };
 ```
 
-## Errors
+### Errors
 
 Since v1.1.0 errors are catchable by the CATCH node.  If an error occurs, a message will not be sent.  Common errors include the following:
 
-**Error** - 'Invalid payload!' - Command must be under 32 characters.
-**Error** - 'Syntax Error!' - Ezo board did not recognize the command.  
-**Warning** - 'No data to send.' - Command sent to the Ezo board was empty.
+**'Invalid payload!'** - Error: Command must be under 32 characters.  
+**'Syntax Error!'** - Error: Ezo board did not recognize the command.  
+**'No data to send.'** - Warning: Command sent to the Ezo board was empty.  
 
-### Important Note
+## Important Note
 
-This node is using the I2C-bus package from @fivdi. You can find his work on github: https://github.com/fivdi/i2c-bus  
-This node is designed to work with Atlas Scientific Ezo modules: https://atlas-scientific.com/
+This node uses the I2C-bus package from @fivdi. You can find his work on github: https://github.com/fivdi/i2c-bus  
