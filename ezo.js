@@ -3,7 +3,7 @@ module.exports = function(RED) {
 
     function Ezo(config) {
         RED.nodes.createNode(this, config);
-
+        this.ezoTopic = config.ezoTopic;
         if (config.customAddr) { 
             this.address = parseInt(config.address);
         } else {
@@ -49,18 +49,15 @@ module.exports = function(RED) {
                     break;
             }
         }
-
         var node = this;
         var isRunning = false;
         var noRead = ['sleep', 'factory', 'i2c'];
-
         node.errorHandler = (port, err, msg) => {
             port.closeSync();
             node.error(err, msg);
             isRunning = false;
             return;
         }
-
         node.processRequest = (req) => {
             var newStr = '';
             var c = '';
@@ -80,7 +77,6 @@ module.exports = function(RED) {
             }
             return newStr;
         }
-
         node.processResponse = (res) => {
             var converted = { command: '', value: ''};
             var resString = res.toString('utf8', 1).replace(/\0/g, '');
@@ -108,7 +104,6 @@ module.exports = function(RED) {
             }
             return converted;
         };
-
         node.on("input", function(msg) {
             var pload = node.processRequest(msg);
             if (pload.length > 32) {
@@ -145,9 +140,8 @@ module.exports = function(RED) {
                                     return;
                                 }
                                 var newRes = node.processResponse(res);
-                                if (newRes.command === '') {
-                                    newRes.command = (pload.indexOf(',') === -1) ? pload : pload.split(',')[0];
-                                }
+                                if (newRes.command === '') { newRes.command = (pload.indexOf(',') === -1) ? pload : pload.split(',')[0]; }
+                                if (!msg.hasOwnProperty('topic') && node.ezoTopic !== undefined) { msg.topic = node.ezoTopic; }
                                 msg.command = newRes.command;
                                 msg.payload = newRes.value;
                                 node.send(msg);

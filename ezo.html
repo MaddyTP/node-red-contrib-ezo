@@ -6,19 +6,6 @@
     <div class="form-row">
         <label for="node-input-ezoBoard"><i class="fa fa-microchip"></i> Module</label>
         <select id="node-input-ezoBoard">
-            <option value="ph">pH</option>
-            <option value="orp">ORP</option>
-            <option value="do">Dissolved Oxygen</option>
-            <option value="ec">Conductivity</option>
-            <option value="rtd">Temperature</option>
-            <option value="co2">CO2 (Gas)</option>
-            <option value="o2">Oxygen (Gas)</option>
-            <option value="hum">Humidity</option>
-            <option value="prs">Pressure</option>
-            <option value="pmp">Peristaltic Pump</option>
-            <option value="pmp-l">Peristaltic Pump - Large</option>
-            <option value="rgb">Color</option>
-            <option value="flo">Flow</option>
         </select>
     </div>
     <div class="form-row">
@@ -72,22 +59,53 @@
 </script>
 
 <script type="text/javascript">
+    var values = [
+        {v:"ph", t:"pH", tp:'ph'},
+        {v:"orp", t:"ORP", tp:'orp'},
+        {v:"do", t:"Dissolved Oxygen", tp:'dissolved_oxygen'},
+        {v:"ec", t:"Conductivity", tp:'conductivity'},
+        {v:"rtd", t:"Temperature", tp:'temperature'},
+        {v:"co2", t:"Carbon Dioxide", tp:'carbon_dioxide'},
+        {v:"o2", t:"Oxygen", tp:'oxygen'},
+        {v:"hum", t:"Humidity", tp:'humidity'},
+        {v:"prs", t:"Pressure", tp:'pressure'},
+        {v:"pmp", t:"Peristaltic", tp:'peristaltic'},
+        {v:"pmp-l", t:"Peristaltic - Large", tp:'peristaltic_large'},
+        {v:"rgb", t:"Color", tp:'color'},
+        {v:"flo", t:"Flow", tp:'flow'},
+    ];
     RED.nodes.registerType('ezo', {
         category: 'ezo',
         defaults: {
-            name: { value: "" },
+            name: { value: '' },
             address: { value: 3, validate: function (v) { return ((v === 3) || (RED.validators.number(v) && (v >= 3) && (v <= 127))) } },
             customAddr: { value: false },
-            ezoBoard: { value: "ph" },
-            tempComp: { value: false },
+            ezoBoard: { value: '' },
+            ezoTopic: { value: '' },
         },
         color:"#54A769",
         inputs:1,
         outputs:1,
         icon: "serial.png",
-        label: function() { return this.name || this.ezoBoard; },
+        label: function() { 
+            var valueText = "";
+            for (var i = 0; i < values.length; i++) {
+                if (values[i].v === this.ezoBoard) {
+                    valueText = values[i].t;
+                    this.ezoTopic = values[i].tp;
+                    break;
+                }
+            }
+            return this.name || valueText || "ezo";
+        },
         labelStyle: function() { return this.name ? "node_label_italic" : ""; },
         oneditprepare: function() {
+            for (var i = 0; i < values.length; i++) {
+                var value = values[i].v;
+                var text = values[i].t;
+                $('#node-input-ezoBoard').append($("<option></option>").attr("value", value).text(text));
+            }
+            $('#node-input-ezoBoard').val(this.ezoBoard);
             $('#node-input-customAddr').on("change", function () {
                 if ($(this)[0].checked) {
                     $('.addr-row').show();
