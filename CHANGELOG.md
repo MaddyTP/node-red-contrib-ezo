@@ -1,3 +1,9 @@
+v1.1.2 / May 29 2021
+===================
+  
+  * Improved node label text
+  * Added `msg.topic` to output if no topic on input
+  
 v1.1.1 / May 27 2021
 ===================
   

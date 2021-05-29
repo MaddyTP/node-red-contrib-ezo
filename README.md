@@ -36,6 +36,7 @@ Some commands such as 'Sleep', 'Factory', and 'I2C,n' do not provide a response 
 
 ```javascript
 msg = {
+    topic: String,
     command: String,
     payload: String / Number / Array,
 }
@@ -43,12 +44,14 @@ msg = {
 
 Examples of commands and responses:
 
+**Ezo Board:**  Temperature  
 **Command:**  Status  
-**Raw Response:**  1?STATUS,P,3.28
+**Raw Response:**  1?STATUS,P,3.28  
   
 **Node Output:**
 ```javascript
 msg = {
+    topic: 'tempurature',
     command: 'STATUS',
     payload: [
         'P',
@@ -59,12 +62,14 @@ msg = {
   
 **--- OR ---**  
   
+**Ezo Board:**  pH  
 **Command:**  R   
 **Raw Response:**  19.831
   
 **Node Output:**
 ```javascript
 msg = {
+    topic: 'ph',
     command: 'R',
     payload: 9.831,
 };
