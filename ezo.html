@@ -9,6 +9,10 @@
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-ezoTopic"><i class="fa fa-envelope-o"></i> Topic</label>
+        <input type="text" id="node-input-ezoTopic">
+    </div>
+    <div class="form-row">
         <label for='node-input-customAddr'><i class='fa fa-pencil'></i> Custom</label>
         <input type='checkbox' id='node-input-customAddr' style='width: auto; border: none; vertical-align: baseline;'>
         <span for='node-input-customAddr' style="padding-left: 5px;">User-defined address?</span>
@@ -92,7 +96,7 @@
             for (var i = 0; i < values.length; i++) {
                 if (values[i].v === this.ezoBoard) {
                     valueText = values[i].t;
-                    this.ezoTopic = values[i].tp;
+                    if (this.ezoTopic === '') this.ezoTopic = values[i].tp;
                     break;
                 }
             }
