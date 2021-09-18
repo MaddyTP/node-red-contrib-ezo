@@ -1,3 +1,9 @@
+v1.2.1 / September 18 2021
+===================
+  * Improved output data types
+  * Fixes #2
+  * Fixes #3
+
 v1.2.0 / June 20 2021
 ===================
   
