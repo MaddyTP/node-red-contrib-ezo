@@ -83,20 +83,21 @@ module.exports = function(RED) {
             if (resString !== '') {
                 if (resString.indexOf(',') !== -1) {
                     var splt = resString.split(',');
+                    var stp = 0;
                     if (splt[0].indexOf('?') !== -1) {
                         converted.command = splt[0].replace('?', '');
+                        stp = 1;
                     }
-                    if (splt.length !== 2) {
-                        converted.value = [];
-                        var i;
-                        for (i = 1; i < splt.length; i++) {
-                            converted.value.push(splt[i]);
-                        }
-                    } else {
-                        converted.value = Number.isNaN(splt[1]) ? splt[1] : parseFloat(splt[1]);
+                    converted.value = [];
+                    for (var i = stp; i < splt.length; i++) {
+                        if (splt[i] === '') { 
+                            converted.value.push( '' );
+                        } else {
+                            converted.value.push( isNaN(splt[i]) ? splt[i] : parseFloat(splt[i]) );
+                        };
                     }
                 } else {
-                    converted.value = Number.isNaN(resString) ? resString : parseFloat(resString);
+                    converted.value = isNaN(resString) ? resString : parseFloat(resString);
                 }
             } else {
                 converted.command = '';
