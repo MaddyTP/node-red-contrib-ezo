@@ -14,7 +14,7 @@ Designed to accept all standard commands from the Atlas Scientific documentation
 
 ### Input
 
-All commands can be sent as a single string in `msg.payload`, those which have a command and input value separated by a comma can be broken into `msg.command` and `msg.payload` properties. Commands can differ from one Ezo module to another, please refer to Atlas Scientific's website for documentation.  Below are a few examples of commands structured in an acceptable manner.
+All commands can be sent as a single string in `msg.payload`, those which have a command and input value separated by a comma can be broken into `msg.command` and `msg.payload` properties. Since v1.3.0 `msg.address` can be set dynamically on input. Commands can differ from one Ezo module to another, please refer to Atlas Scientific's website for documentation.  Below are a few examples of commands structured in an acceptable manner.
 
 ```javascript
 msg = { payload: 'L,0' };  // turns led off
@@ -28,6 +28,8 @@ msg = { command: 'L', payload: '1' };  // turns led on
 msg = { payload: 'Status' };  // returns status
 
 msg = { command: 'R'};  // reads probe
+
+msg = { command: 'R', address: 105 }  // reads probe at address 105
 ```
 
 ### Ouptut

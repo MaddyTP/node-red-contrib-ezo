@@ -4,7 +4,7 @@ module.exports = function(RED) {
     function Ezo(config) {
         RED.nodes.createNode(this, config);
         this.ezoTopic = config.ezoTopic;
-        if (config.customAddr) { 
+        if (config.customAddr) {
             this.address = parseInt(config.address);
         } else {
             switch(config.ezoBoard) {
@@ -72,7 +72,7 @@ module.exports = function(RED) {
                 newStr = `${c},${p}`;
             } else if (c !== '') {
                 newStr = c;
-            } else {             
+            } else if (p !== '') {             
                 newStr = p;
             }
             return newStr;
@@ -107,13 +107,14 @@ module.exports = function(RED) {
         };
         node.on("input", function(msg) {
             var pload = node.processRequest(msg);
+            var addr = msg.address || node.address;
             if (pload.length > 32) {
                 node.error('Invalid payload!');
                 return;
             }
             var buf = Buffer.from(pload);
             var port = I2C.openSync(1);
-            port.i2cWrite(node.address, buf.length, buf, function(err) {
+            port.i2cWrite(addr, buf.length, buf, function(err) {
                 if (err) {
                     node.errorHandler(port, err, msg);
                     return;
@@ -123,7 +124,7 @@ module.exports = function(RED) {
                     isRunning = true;
                     var rBuf = Buffer.alloc(32);
                     const loop = setInterval(() => {
-                        port.i2cRead(node.address, rBuf.length, rBuf, function(err, size, res) {
+                        port.i2cRead(addr, rBuf.length, rBuf, function(err, size, res) {
                             if (err) {
                                 node.errorHandler(port, err, msg);
                                 return;
