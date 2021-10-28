@@ -26,18 +26,18 @@
 <script type="text/html" data-help-name="ezo">
     <h3>Details</h3>
     <p>
-        Communicates with Atlas Scientific Ezo modules over I2C.
-        See manufacturers documentation for supported commands.
+        Communicates with Atlas Scientific Ezo modules over I2C. See manufacturers documentation for supported commands.
     </p>
     <p>
-        Input accepts a string in <code>msg.payload</code>, 
-        sends to device as Buffer, then outputs the response.
+        <strong>Input</strong> accepts a string in <code>msg.payload</code>, sends to device as Buffer, then outputs the response. Input also optionally accepts two additional properties which are useful for dynamic flows:
+        <ul>
+            <li><code>msg.address</code> which, if present, will override the node‘s default or user-defined address
+            </li>
+            <li><code>msg.port</code> which, if present, will override the default `/dev/i2c-1` port. For example, setting this to `11` would result in the node using `/dev/i2c-11`.</li>
+        </ul>
     </p>
     <p>
-        Response is broken into three properties: <code>msg.status</code>
-         stores the response status with message, <code>msg.command</code>
-         stores the initial command, and <code>msg.payload</code>
-         stores the response value(s).
+        <strong>Response</strong> is broken into three properties: <code>msg.status</code> stores the response status with message, <code>msg.command</code> stores the initial command, and <code>msg.payload</code> stores the response value(s).
     </p>
     <h3>References</h3>
     <ul>
@@ -63,35 +63,87 @@
 </script>
 
 <script type="text/javascript">
-    var values = [
-        {v:"ph", t:"pH", tp:'ph'},
-        {v:"orp", t:"ORP", tp:'orp'},
-        {v:"do", t:"Dissolved Oxygen", tp:'dissolved_oxygen'},
-        {v:"ec", t:"Conductivity", tp:'conductivity'},
-        {v:"rtd", t:"Temperature", tp:'temperature'},
-        {v:"co2", t:"Carbon Dioxide", tp:'carbon_dioxide'},
-        {v:"o2", t:"Oxygen", tp:'oxygen'},
-        {v:"hum", t:"Humidity", tp:'humidity'},
-        {v:"prs", t:"Pressure", tp:'pressure'},
-        {v:"pmp", t:"Peristaltic", tp:'peristaltic'},
-        {v:"pmp-l", t:"Peristaltic - Large", tp:'peristaltic_large'},
-        {v:"rgb", t:"Color", tp:'color'},
-        {v:"flo", t:"Flow", tp:'flow'},
-    ];
+    var values = [{
+        v: "ph",
+        t: "pH",
+        tp: 'ph'
+    }, {
+        v: "orp",
+        t: "ORP",
+        tp: 'orp'
+    }, {
+        v: "do",
+        t: "Dissolved Oxygen",
+        tp: 'dissolved_oxygen'
+    }, {
+        v: "ec",
+        t: "Conductivity",
+        tp: 'conductivity'
+    }, {
+        v: "rtd",
+        t: "Temperature",
+        tp: 'temperature'
+    }, {
+        v: "co2",
+        t: "Carbon Dioxide",
+        tp: 'carbon_dioxide'
+    }, {
+        v: "o2",
+        t: "Oxygen",
+        tp: 'oxygen'
+    }, {
+        v: "hum",
+        t: "Humidity",
+        tp: 'humidity'
+    }, {
+        v: "prs",
+        t: "Pressure",
+        tp: 'pressure'
+    }, {
+        v: "pmp",
+        t: "Peristaltic",
+        tp: 'peristaltic'
+    }, {
+        v: "pmp-l",
+        t: "Peristaltic - Large",
+        tp: 'peristaltic_large'
+    }, {
+        v: "rgb",
+        t: "Color",
+        tp: 'color'
+    }, {
+        v: "flo",
+        t: "Flow",
+        tp: 'flow'
+    }, ];
     RED.nodes.registerType('ezo', {
         category: 'ezo',
         defaults: {
-            name: { value: '' },
-            address: { value: 3, validate: function (v) { return ((v === 3) || (RED.validators.number(v) && (v >= 3) && (v <= 127))) } },
-            customAddr: { value: false },
-            ezoBoard: { value: '', required: true },
-            ezoTopic: { value: '' },
+            name: {
+                value: ''
+            },
+            address: {
+                value: 3,
+                validate: function(v) {
+                    return ((v === 3) || (RED.validators.number(v) && (v >= 3) && (v <= 127)))
+                }
+            },
+            customAddr: {
+                value: false
+            },
+            ezoBoard: {
+                value: '',
+                required: true
+            },
+            ezoTopic: {
+                value: ''
+            },
         },
-        color:"#54A769",
-        inputs:1,
-        outputs:1,
+        color: "#54A769",
+        inputs: 1,
+        outputs: 1,
         icon: "serial.png",
-        label: function() { 
+        label: function() {
             var valueText = "";
             for (var i = 0; i < values.length; i++) {
                 if (values[i].v === this.ezoBoard) {
@@ -102,7 +154,9 @@
             }
             return this.name || valueText || "ezo";
         },
-        labelStyle: function() { return this.name ? "node_label_italic" : ""; },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
         oneditprepare: function() {
             for (var i = 0; i < values.length; i++) {
                 var value = values[i].v;
@@ -110,11 +164,10 @@
                 $('#node-input-ezoBoard').append($("<option></option>").attr("value", value).text(text));
             }
             $('#node-input-ezoBoard').val(this.ezoBoard);
-            $('#node-input-customAddr').on("change", function () {
+            $('#node-input-customAddr').on("change", function() {
                 if ($(this)[0].checked) {
                     $('.addr-row').show();
-                }
-                else {
+                } else {
                     $('.addr-row').hide();
                 }
             });

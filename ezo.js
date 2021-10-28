@@ -7,7 +7,7 @@ module.exports = function(RED) {
         if (config.customAddr) {
             this.address = parseInt(config.address);
         } else {
-            switch(config.ezoBoard) {
+            switch (config.ezoBoard) {
                 case 'ph':
                     this.address = 99;
                     break;
@@ -72,13 +72,13 @@ module.exports = function(RED) {
                 newStr = `${c},${p}`;
             } else if (c !== '') {
                 newStr = c;
-            } else if (p !== '') {             
+            } else if (p !== '') {
                 newStr = p;
             }
             return newStr;
         }
         node.processResponse = (res) => {
-            var converted = { command: '', value: ''};
+            var converted = { command: '', value: '' };
             var resString = res.toString('utf8', 1).replace(/\0/g, '');
             if (resString !== '') {
                 if (resString.indexOf(',') !== -1) {
@@ -90,10 +90,10 @@ module.exports = function(RED) {
                     }
                     converted.value = [];
                     for (var i = stp; i < splt.length; i++) {
-                        if (splt[i] === '') { 
-                            converted.value.push( '' );
+                        if (splt[i] === '') {
+                            converted.value.push('');
                         } else {
-                            converted.value.push( isNaN(splt[i]) ? splt[i] : parseFloat(splt[i]) );
+                            converted.value.push(isNaN(splt[i]) ? splt[i] : parseFloat(splt[i]));
                         };
                     }
                 } else {
@@ -108,12 +108,13 @@ module.exports = function(RED) {
         node.on("input", function(msg) {
             var pload = node.processRequest(msg);
             var addr = msg.address || node.address;
+            var portNumber = +msg.port || 1;
             if (pload.length > 32) {
                 node.error('Invalid payload!');
                 return;
             }
             var buf = Buffer.from(pload);
-            var port = I2C.openSync(1);
+            var port = I2C.openSync(portNumber);
             port.i2cWrite(addr, buf.length, buf, function(err) {
                 if (err) {
                     node.errorHandler(port, err, msg);
