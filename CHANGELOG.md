@@ -1,3 +1,7 @@
+v1.4.0 / December 26 2021
+===================
+  * Adds dynamic bus
+
 v1.3.0 / October 27 2021
 ===================
   * Adds dynamic address to input (#5)
