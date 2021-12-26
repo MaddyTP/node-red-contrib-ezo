@@ -13,6 +13,10 @@
         <input type="text" id="node-input-ezoTopic">
     </div>
     <div class="form-row">
+        <label for="node-input-bus"><i class="fa fa-address-card-o"></i> Bus</label>
+        <input type="number" id="node-input-bus" style='width: 100px;' min=0 max=7>
+    </div>
+    <div class="form-row">
         <label for='node-input-customAddr'><i class='fa fa-pencil'></i> Custom</label>
         <input type='checkbox' id='node-input-customAddr' style='width: auto; border: none; vertical-align: baseline;'>
         <span for='node-input-customAddr' style="padding-left: 5px;">User-defined address?</span>
@@ -86,6 +90,7 @@
             customAddr: { value: false },
             ezoBoard: { value: '', required: true },
             ezoTopic: { value: '' },
+            bus: { value: 1, required: true, validate: function (v) { return ((v === 1) || (RED.validators.number(v) && (v >= 0) && (v <= 7))) } },
         },
         color:"#54A769",
         inputs:1,
@@ -104,6 +109,10 @@
         },
         labelStyle: function() { return this.name ? "node_label_italic" : ""; },
         oneditprepare: function() {
+            //add a default bus for older nodes (<= v1.3.0)
+            if (this.bus == undefined) {
+                this.bus = 1;
+            }
             for (var i = 0; i < values.length; i++) {
                 var value = values[i].v;
                 var text = values[i].t;
@@ -113,8 +122,7 @@
             $('#node-input-customAddr').on("change", function () {
                 if ($(this)[0].checked) {
                     $('.addr-row').show();
-                }
-                else {
+                } else {
                     $('.addr-row').hide();
                 }
             });

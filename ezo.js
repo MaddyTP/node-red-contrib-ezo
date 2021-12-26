@@ -4,6 +4,8 @@ module.exports = function(RED) {
     function Ezo(config) {
         RED.nodes.createNode(this, config);
         this.ezoTopic = config.ezoTopic;
+        //add default value for older nodes (<= 1.3.0)
+        this.bus = config.bus || 1;
         if (config.customAddr) {
             this.address = parseInt(config.address);
         } else {
@@ -108,12 +110,13 @@ module.exports = function(RED) {
         node.on("input", function(msg) {
             var pload = node.processRequest(msg);
             var addr = msg.address || node.address;
+            var bus = msg.bus || node.bus;
             if (pload.length > 32) {
                 node.error('Invalid payload!');
                 return;
             }
             var buf = Buffer.from(pload);
-            var port = I2C.openSync(1);
+            var port = I2C.openSync(bus);
             port.i2cWrite(addr, buf.length, buf, function(err) {
                 if (err) {
                     node.errorHandler(port, err, msg);

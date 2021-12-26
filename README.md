@@ -1,6 +1,6 @@
 # node-red-contrib-ezo
 
-This Node-Red is designed to communicate with Atlas Scientific Ezo modules over I2C.  Current version only supports ezo modules in I2C mode and newer Raspberry Pi's on bus 1 - /dev/i2c-1.
+This Node-Red is designed to communicate with Atlas Scientific Ezo modules over I2C.
 
 ## Install
 
@@ -14,7 +14,10 @@ Designed to accept all standard commands from the Atlas Scientific documentation
 
 ### Input
 
-All commands can be sent as a single string in `msg.payload`, those which have a command and input value separated by a comma can be broken into `msg.command` and `msg.payload` properties. Since v1.3.0 `msg.address` can be set dynamically on input. Commands can differ from one Ezo module to another, please refer to Atlas Scientific's website for documentation.  Below are a few examples of commands structured in an acceptable manner.
+All commands can be sent as a single string in `msg.payload`, those which have a command and input value separated by a comma can be broken into `msg.command` and `msg.payload` properties. Commands can differ from one Ezo module to another, please refer to Atlas Scientific's website for documentation.  Below are a few examples of commands structured in an acceptable manner.  
+
+Since v1.3.0 `msg.address` can be set dynamically on input.
+Since v1.4.0 `msg.bus` can be set dynamically on input.
 
 ```javascript
 msg = { payload: 'L,0' };  // turns led off
@@ -29,7 +32,7 @@ msg = { payload: 'Status' };  // returns status
 
 msg = { command: 'R'};  // reads probe
 
-msg = { command: 'R', address: 105 }  // reads probe at address 105
+msg = { command: 'R', address: 105, bus: 1 }  // reads probe at address 105 and bus 1
 ```
 
 ### Ouptut
